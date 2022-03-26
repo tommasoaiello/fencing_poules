@@ -9,7 +9,6 @@ typedef struct classifica_s{
     struct classifica_s *left, *right;
 }classifica;
 
-
 typedef struct list_of_players_s{
     char name[25];
     int ranking;
@@ -18,18 +17,29 @@ typedef struct list_of_players_s{
     int plusminus;
 }list_of_players;
 
+typedef struct girone_s{
+    int numberOfFencers;
+    int *indexes;
+}girone;
+
 int numberOfPlayers;
 list_of_players* fencers;
 int** poule;
 classifica* radice;
+classifica* classifica_iniziale;
+girone** lista_gironi;
+int pos=1;
+int gironida7=0;
+int gironida6=0;
 
 void printList(){
     int i;
     printf("Fencers list:\n");
-    for(i=0;i<numberOfPlayers;i++){
+    for(i=0;i<numberOfPlayers-1;i++){
         printf("%s , ", fencers[i].name);
     }
-    printf("\n");
+    printf("%s\n", fencers[numberOfPlayers-1].name);
+
 }
 
 int compare(int index1, int index2){
@@ -68,13 +78,15 @@ classifica* insertNewFencer(classifica* root, int indice){
 }
 
 void print_fencer(int i){
-    printf("%s: VICTORIES %d , SCORED %d , +- %d\n",fencers[i].name, fencers[i].victories , fencers[i].scored, fencers[i].plusminus);
+    printf("%s : VICTORIES %d , SCORED %d , +- %d\n",fencers[i].name, fencers[i].victories , fencers[i].scored, fencers[i].plusminus);
 }
 
 void in_order_walk(classifica* root){
     if(root!= NULL){
         in_order_walk(root->left);
+        printf("%d ", pos);
         print_fencer(root->indice);
+        pos++;
         in_order_walk(root->right);
     }
     return;
@@ -98,6 +110,28 @@ void calcResults(){
     in_order_walk(radice);
     printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 }
+
+//needs to be completed
+void calc_gironi(int numberOfPlayers){
+    int tmp= numberOfPlayers;
+    int i;
+    if(tmp%3==0)
+        gironida7 = tmp/3;
+
+    //else da completare
+    lista_gironi = malloc( tmp * (sizeof (girone*)));
+    for(i=0; i<tmp; i++){
+        lista_gironi[i]= malloc(sizeof (girone));
+        lista_gironi[i]->numberOfFencers=7;
+        lista_gironi[i]->indexes=NULL;
+    }
+}
+
+
+
+
+
+
 
 int main(){
     char command[100];
@@ -124,6 +158,15 @@ int main(){
         }
     }
 
+    /*INITIALIZES THE CLASSIFICA INIZIALE*/
+    for(i=0; i< numberOfPlayers;i++){
+        classifica_iniziale=insertNewFencer(classifica_iniziale,i);
+    }
+
+    /*CREATES THE POOLES*/
+    calc_gironi(numberOfPlayers);
+
+
     /*INITIALIZES THE POULE*/
     poule= malloc((numberOfPlayers)*sizeof(int*));
     for(i=0;i<numberOfPlayers;i++){
@@ -141,6 +184,8 @@ int main(){
 
 
 
+
+
     printf("Fencers attending the competition: %d\n", numberOfPlayers);
 
     printList();
@@ -148,5 +193,6 @@ int main(){
     calcResults();
 
 
+    //need to do the free of all
     return 0;
 }
