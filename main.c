@@ -14,6 +14,8 @@ typedef struct list_of_players_s{
     char name[25];
     int ranking;
     int victories;
+    int losses;
+    float ratio;
     int scored;
     int plusminus;
 }list_of_players;
@@ -32,6 +34,7 @@ int pos=1;
 int k=0;
 int gironida7=0;
 int gironida6=0;
+int num=0;
 
 void printList(){
     int i;
@@ -47,11 +50,11 @@ int compare(int index1, int index2){
     list_of_players fencer1,fencer2;
     fencer1= fencers[index1];
     fencer2= fencers[index2];
-    if(fencer1.victories > fencer2.victories)
+    if(fencer1.ratio > fencer2.ratio)
         return 1;
-    else if(fencer1.victories == fencer2.victories && fencer1.plusminus > fencer2.plusminus)
+    else if(fencer1.ratio == fencer2.ratio && fencer1.plusminus > fencer2.plusminus)
         return 1;
-    else if(fencer1.plusminus == fencer2.plusminus && fencer1.scored >= fencer2.scored)
+    else if(fencer1.ratio== fencer2.ratio && fencer1.plusminus == fencer2.plusminus && fencer1.scored >= fencer2.scored)
         return 1;
     else
         return 0;
@@ -79,7 +82,7 @@ classifica* insertNewFencer(classifica* root, int indice){
 }
 
 void print_fencer(int i){
-    printf("%s : VICTORIES %d , SCORED %d , DIFFERENCE %d\n",fencers[i].name, fencers[i].victories , fencers[i].scored, fencers[i].plusminus);
+    printf("%s : VICTORIES %d , RATIO %f , SCORED %d , DIFFERENCE %d\n",fencers[i].name,fencers[i].victories , fencers[i].ratio, fencers[i].scored, fencers[i].plusminus);
 }
 
 void in_order_walk(classifica* root){
@@ -96,25 +99,23 @@ void in_order_walk(classifica* root){
 void calcResults(){
     int i,j;
     int tmp;
-    tmp= k-NUM;
-    //printf("++++++++++++++++++++++++RESULTS+++++++++++++++++++++++\n");
-    for(i=0; i<NUM; i++) {
-        for (j = 0; j < NUM; j++) {
+    tmp= k-num;
+    for(i=0; i<num; i++) {
+        for (j = 0; j < num; j++) {
             if (poule[i][j] == 5)
                 fencers[tmp].victories++;
             fencers[tmp].scored= fencers[tmp].scored + poule[i][j];
             fencers[tmp].plusminus= fencers[tmp].plusminus + poule[j][i];
         }
         fencers[tmp].plusminus= fencers[tmp].scored - fencers[tmp].plusminus;
+        fencers[tmp].losses = num - fencers[tmp].victories - 1;
+        fencers[tmp].ratio = (float)fencers[tmp].victories / (float)(fencers[tmp].victories + fencers[tmp].losses);
         radice= insertNewFencer(radice,tmp);
         tmp++;
     }
-    /*for(i=0; i< NUM; i++){
-        radice = insertNewFencer(radice,i);
-    }*/
-    //printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 }
 
+/*
 //needs to be completed
 void calc_gironi(int numberOfPlayers){
     int tmp= numberOfPlayers;
@@ -128,7 +129,7 @@ void calc_gironi(int numberOfPlayers){
         lista_gironi[i]= malloc(sizeof (girone));
         lista_gironi[i]->numberOfFencers=3;
     }
-}
+}*/
 
 
 
@@ -148,18 +149,16 @@ int main(){
         fencers= malloc(numberOfPlayers* sizeof(list_of_players));
     }
 
-    /*CREATES THE POOLES*/
-    calc_gironi(numberOfPlayers);
+    /*CREATES THE POOLES
+    calc_gironi(numberOfPlayers);*/
 
-     /*INITIALIZES THE POULE*/
-    poule = malloc((NUM) * sizeof(int *));
-    for (i = 0; i < NUM; i++) {
-        poule[i] = malloc((NUM) * sizeof(int));
-    }
 
     /*GETS THE NAME OF THE FENCERS*/
     while(!feof(stdin)) {
-        for (i = 0; i < NUM; i++) {
+        if(fgets(command,25,stdin)!=NULL){
+            sscanf(command, "%d", &num);
+         }        
+        for (i = 0; i < num; i++) {
             if (fgets(command, 25, stdin) != NULL) {
                 fencers[k].ranking = 0;
                 fencers[k].victories = 0;
@@ -173,18 +172,28 @@ int main(){
             k++;
         }
 
+
+        /*INITIALIZES THE POULE*/
+        poule = malloc((num) * sizeof(int *));
+        for (i = 0; i < num; i++) {
+            poule[i] = malloc((num) * sizeof(int));
+        }
         
     
         
         /*GETS THE RESULT OF THE POULE*/
-        for (i = 0; i < NUM; i++) {
-            for (j = 0; j < NUM; j++) {
+        for (i = 0; i < num; i++) {
+            for (j = 0; j < num; j++) {
                 scanf("%d%c", &poule[i][j], &sep);
             }
         }
 
         calcResults();
 
+        for(i=0; i < num; i++){
+            free(poule[i]);
+        }
+        free(poule);
     }
 
 
